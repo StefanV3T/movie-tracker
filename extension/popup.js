@@ -185,7 +185,6 @@ async function fetchAndMergeSupabaseData(authSession) {
   }
 }
 
-// Update displayLocalMovies to show view count
 function displayLocalMovies() {
   try {
     chrome.storage.local.get(['watchedMovies'], (result) => {
@@ -220,23 +219,41 @@ function displayLocalMovies() {
       movies.forEach((movie) => {
         const li = document.createElement("li");
         
+        // Add platform indicator
+        if (movie.platform) {
+          li.classList.add(`platform-${movie.platform}`);
+          li.setAttribute('data-platform', movie.platform);
+        }
+        
         // Create title element
         const titleSpan = document.createElement("span");
         titleSpan.textContent = movie.title;
         li.appendChild(titleSpan);
         
         // Add view count if available
-        // if (movie.viewCount && movie.viewCount > 1) {
-        //   const countBadge = document.createElement("span");
-        //   countBadge.textContent = `${movie.viewCount}`;
-        //   countBadge.style.fontSize = "11px";
-        //   countBadge.style.backgroundColor = "#e50914";
-        //   countBadge.style.color = "white";
-        //   countBadge.style.padding = "1px 5px";
-        //   countBadge.style.borderRadius = "10px";
-        //   countBadge.style.marginLeft = "7px";
-        //   titleSpan.appendChild(countBadge);
-        // }
+        if (movie.viewCount && movie.viewCount > 1) {
+          const countBadge = document.createElement("span");
+          countBadge.textContent = `${movie.viewCount}×`;
+          countBadge.style.fontSize = "11px";
+          countBadge.style.backgroundColor = "#e50914";
+          countBadge.style.color = "white";
+          countBadge.style.padding = "1px 5px";
+          countBadge.style.borderRadius = "10px";
+          countBadge.style.marginLeft = "7px";
+          titleSpan.appendChild(countBadge);
+        }
+        
+        // Add platform badge
+        const platformBadge = document.createElement("span");
+        platformBadge.textContent = movie.platform === 'disney' ? 'Disney+' : 'Netflix';
+        platformBadge.style.fontSize = "10px";
+        platformBadge.style.backgroundColor = movie.platform === 'disney' ? '#0063e5' : '#e50914';
+        platformBadge.style.color = "white";
+        platformBadge.style.padding = "1px 5px";
+        platformBadge.style.borderRadius = "10px";
+        platformBadge.style.marginLeft = "7px";
+        platformBadge.style.verticalAlign = "middle";
+        titleSpan.appendChild(platformBadge);
         
         // Add timestamp if available
         const timestamp = movie.lastWatched || movie.timestamp;

@@ -1,4 +1,4 @@
-console.log("Netflix Watch Tracker Loaded");
+console.log("Streaming Watch Tracker Loaded");
 
 // Keep track of the current title to avoid duplicates
 let currentTitle = null;
@@ -6,6 +6,16 @@ let lastSendTime = 0;
 let isUserLoggedIn = false;
 let checkLoginInterval = null;
 const SEND_COOLDOWN = 10000; // 10 seconds cooldown
+
+// Determine which streaming platform we're on
+function getPlatform() {
+  if (location.hostname.includes('netflix.com')) {
+    return 'netflix';
+  } else if (location.hostname.includes('disneyplus.com')) {
+    return 'disney';
+  }
+  return null;
+}
 
 // Check if the user is logged in
 function checkLoginStatus() {
@@ -29,11 +39,25 @@ function checkLoginStatus() {
   });
 }
 
-// Function to get titles from Netflix - ONLY using official Netflix title element
+// Function to get titles based on the current platform
 function getTitle() {
+    const platform = getPlatform();
+    
+    if (platform === 'netflix') {
+        return getNetflixTitle();
+    } else if (platform === 'disney') {
+        return getDisneyTitle();
+    }
+    
+    console.log("Not on a supported streaming platform");
+    return null;
+}
+
+// Function to get titles from Netflix
+function getNetflixTitle() {
     // Skip title detection on any non-watch pages
     if (!location.pathname.startsWith("/watch")) {
-        console.log("Not on a /watch page - skipping title detection");
+        console.log("Not on a Netflix watch page - skipping title detection");
         return null;
     }
     
@@ -50,6 +74,55 @@ function getTitle() {
     return null;
 }
 
+// Function to get titles from Disney+
+function getDisneyTitle() {
+    // Skip title detection on any non-play pages
+    if (!location.pathname.includes("/play/")) {
+        console.log("Not on a Disney+ play page - skipping title detection");
+        return null;
+    }
+    
+    // Use the Disney+ title selector
+    const element = document.querySelector('.title-field span');
+    
+    if (element && element.innerText && element.innerText.trim()) {
+        const title = element.innerText.trim();
+        console.log(`Found Disney+ title: "${title}"`);
+        return title;
+    }
+    
+    // Alternate selectors if the first one fails
+    const alternateSelectors = [
+        '.title-field',
+        '[data-testid="title-field"]',
+        'h1.title',
+        '.video-title'
+    ];
+    
+    for (const selector of alternateSelectors) {
+        const element = document.querySelector(selector);
+        if (element && element.innerText && element.innerText.trim()) {
+            const title = element.innerText.trim();
+            console.log(`Found Disney+ title (alternate): "${title}"`);
+            return title;
+        }
+    }
+    
+    console.log("No Disney+ title element found");
+    return null;
+}
+
+// Function to check if we're on a valid watch page
+function isWatchPage() {
+    const platform = getPlatform();
+    if (platform === 'netflix') {
+        return location.pathname.startsWith("/watch");
+    } else if (platform === 'disney') {
+        return location.pathname.includes("/play/");
+    }
+    return false;
+}
+
 // Function to handle title detection and sending
 function checkAndSendTitle() {
     // Skip if user is not logged in
@@ -58,9 +131,9 @@ function checkAndSendTitle() {
         return;
     }
 
-    // Strict check - ONLY process /watch paths
-    if (!location.pathname.startsWith("/watch")) {
-        console.log("Not on a /watch page - skipping title check");
+    // Skip if not on a watch page
+    if (!isWatchPage()) {
+        console.log("Not on a watch page - skipping title check");
         return;
     }
 
@@ -73,8 +146,12 @@ function checkAndSendTitle() {
         currentTitle = title;
         lastSendTime = now;
         
-        // Send message to background script
-        chrome.runtime.sendMessage({ action: "save_movie", title }, response => {
+        // Send message to background script with platform info
+        chrome.runtime.sendMessage({ 
+            action: "save_movie", 
+            title,
+            platform: getPlatform()
+        }, response => {
             console.log("Received response from background script:", response);
             if (response && response.success) {
                 console.log("Movie successfully saved:", title);
@@ -179,4 +256,4 @@ checkLoginStatus();
 // Periodically check login status
 checkLoginInterval = setInterval(checkLoginStatus, 5000);
 
-console.log("Netflix Watch Tracker initialized - waiting for login");
+console.log("Streaming Watch Tracker initialized - waiting for login");

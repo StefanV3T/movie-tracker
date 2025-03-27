@@ -12,7 +12,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       const now = new Date().toISOString();
       
       // Check if movie already exists
-      const existingIndex = movies.findIndex(movie => movie.title === request.title);
+      const existingIndex = movies.findIndex(movie => 
+        movie.title === request.title && movie.platform === request.platform
+      );
       
       if (existingIndex === -1) {
         // New movie - add it
@@ -20,7 +22,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           title: request.title, 
           timestamp: now,
           viewCount: 1,
-          lastWatched: now
+          lastWatched: now,
+          platform: request.platform || 'netflix'
         };
         
         movies.push(newMovie);
@@ -69,7 +72,8 @@ function syncMovieToSupabase(movie, authSession) {
     user_id: userId,
     view_count: movie.viewCount || 1,
     watched_at: movie.timestamp, // Match this to your DB column name
-    last_watched: movie.lastWatched || movie.timestamp
+    last_watched: movie.lastWatched || movie.timestamp,
+    platform: movie.platform || 'netflix'
   };
   
   fetch(

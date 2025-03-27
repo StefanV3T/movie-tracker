@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 51, 51, 51; /* Darker text for better visibility */
+  --background-rgb: 255, 255, 255;
+  --header-text: 0, 0, 0; /* Black text for headers */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 229, 231, 235; /* Light gray text for dark mode */
+    --background-rgb: 17, 24, 39;
+    --header-text: 255, 255, 255;
+  }
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: rgb(var(--background-rgb));
+}
+
+/* Ensure readability in all contexts */
+h1, h2, h3, h4, h5, h6 {
+  color: rgb(var(--header-text));
+}
+
+/* Platform-specific styles */
+.platform-netflix {
+  @apply border-l-4 border-[#e50914];
+}
+
+.platform-disney {
+  @apply border-l-4 border-[#0063e5];
+}

@@ -1,9 +1,11 @@
 :root {
-    --netflix-red: #e50914;
-    --netflix-dark: #141414;
-    --netflix-light: #f5f5f1;
-    --netflix-gray: #757575;
-  }
+  --netflix-red: #e50914;
+  --netflix-dark: #141414;
+  --netflix-light: #f5f5f1;
+  --netflix-gray: #757575;
+  --disney-blue: #0063e5;
+  --disney-dark: #132c5b;
+}
   
   body {
     font-family: 'Helvetica Neue', Arial, sans-serif;
@@ -41,6 +43,14 @@
     border-radius: 4px;
     border-left: 3px solid var(--netflix-red);
     transition: transform 0.2s, background-color 0.2s;
+  }
+
+  #movie-list li[data-platform="disney"] {
+    border-left: 3px solid var(--disney-blue);
+  }
+  
+  #movie-list li[data-platform="netflix"] {
+    border-left: 3px solid var(--netflix-red);
   }
   
   #movie-list li:hover {
