@@ -1,12 +1,14 @@
 {
   "manifest_version": 3,
   "name": "Streaming Watch Tracker",
-  "version": "1.0",
-  "description": "Tracks movies and series you watch on Netflix and Disney+.",
+  "version": "1.2.0",
+  "description": "Tracks movies and series you watch on Netflix, Disney+, HBO Max, and Prime Video",
   "permissions": ["storage"],
   "host_permissions": [
     "https://www.netflix.com/*", 
     "https://www.disneyplus.com/*", 
+    "https://play.max.com/*",
+    "https://www.primevideo.com/*",
     "https://georzuqfssefsmcunjnu.supabase.co/*"
   ],
   "action": {
@@ -20,6 +22,9 @@
       "matches": [
         "https://www.netflix.com/watch/*",
         "https://www.disneyplus.com/*/play/*",
+        "https://play.max.com/video/watch/*",
+        "https://www.primevideo.com/detail/*",
+        "https://www.primevideo.com/watch/*",
         "https://georzuqfssefsmcunjnu.supabase.co/*"
       ],
       "js": ["content.js"]

@@ -152,6 +152,11 @@ async function fetchAndMergeSupabaseData(authSession) {
               (supabaseMovie.last_watched && new Date(supabaseMovie.last_watched) > new Date(localMovie.lastWatched || localMovie.timestamp))) {
             localMovie.viewCount = supabaseMovie.view_count || localMovie.viewCount || 1;
             localMovie.lastWatched = supabaseMovie.last_watched || localMovie.lastWatched || localMovie.timestamp;
+            
+            if (localMovie.platform) {
+              localMovie.platform = supabaseMovie.platform;
+            }
+            
             hasChanges = true;
             console.log(`Updated local movie: ${supabaseMovie.title}`);
           }
@@ -161,10 +166,11 @@ async function fetchAndMergeSupabaseData(authSession) {
             title: supabaseMovie.title,
             timestamp: supabaseMovie.watched_at || new Date().toISOString(),
             viewCount: supabaseMovie.view_count || 1,
-            lastWatched: supabaseMovie.last_watched || supabaseMovie.watched_at || new Date().toISOString()
+            lastWatched: supabaseMovie.last_watched || supabaseMovie.watched_at || new Date().toISOString(),
+            platform: supabaseMovie.platform || 'netflix'
           });
           hasChanges = true;
-          console.log(`Added new local movie: ${supabaseMovie.title}`);
+          console.log(`Added new local movie: ${supabaseMovie.title} (${supabaseMovie.platform || 'netflix'})`);
         }
       });
       
@@ -215,8 +221,11 @@ function displayLocalMovies() {
         const dateB = b.lastWatched ? new Date(b.lastWatched) : new Date(b.timestamp || 0);
         return dateB - dateA;
       });
+
+      const moviesToDisplay = movies.slice(0, 4)
+      const hasMoreMovies = movies.length > 4;
       
-      movies.forEach((movie) => {
+      moviesToDisplay.forEach((movie) => {
         const li = document.createElement("li");
         
         // Add platform indicator
@@ -233,7 +242,7 @@ function displayLocalMovies() {
         // Add view count if available
         if (movie.viewCount && movie.viewCount > 1) {
           const countBadge = document.createElement("span");
-          countBadge.textContent = `${movie.viewCount}×`;
+          countBadge.textContent = `${movie.viewCount} times`;
           countBadge.style.fontSize = "11px";
           countBadge.style.backgroundColor = "#e50914";
           countBadge.style.color = "white";
@@ -245,9 +254,29 @@ function displayLocalMovies() {
         
         // Add platform badge
         const platformBadge = document.createElement("span");
-        platformBadge.textContent = movie.platform === 'disney' ? 'Disney+' : 'Netflix';
+        let platformText, platformColor;
+        
+        switch(movie.platform) {
+          case 'disney':
+            platformText = 'Disney+';
+            platformColor = '#0063e5';
+            break;
+          case 'hbo':
+            platformText = 'HBO Max';
+            platformColor = '#5822b4'; // HBO's purple color
+            break;
+          case 'prime':
+            platformText = 'Prime';
+            platformColor = '#00A8E1'; // Amazon Prime blue color
+            break;
+          default: // netflix
+            platformText = 'Netflix';
+            platformColor = '#e50914';
+        }
+        
+        platformBadge.textContent = platformText;
         platformBadge.style.fontSize = "10px";
-        platformBadge.style.backgroundColor = movie.platform === 'disney' ? '#0063e5' : '#e50914';
+        platformBadge.style.backgroundColor = platformColor;
         platformBadge.style.color = "white";
         platformBadge.style.padding = "1px 5px";
         platformBadge.style.borderRadius = "10px";
@@ -269,6 +298,28 @@ function displayLocalMovies() {
         
         movieList.appendChild(li);
       });
+
+      if (hasMoreMovies) {
+        const viewAllItem = document.createElement("li");
+        viewAllItem.className = "view-all-item";
+        viewAllItem.style.textAlign = "center";
+        viewAllItem.style.padding = "8px";
+        viewAllItem.style.marginTop = "10px";
+        viewAllItem.style.backgroundColor = "#f5f5f5";
+        viewAllItem.style.borderRadius = "4px";
+        viewAllItem.style.cursor = "pointer";
+        
+        const viewAllLink = document.createElement("a");
+        viewAllLink.textContent = `View all ${movies.length} movies`;
+        viewAllLink.href = "http://localhost:3000/dashboard";
+        viewAllLink.target = "_blank";
+        viewAllLink.style.color = "#e50914";
+        viewAllLink.style.textDecoration = "none";
+        viewAllLink.style.fontWeight = "bold";
+        
+        viewAllItem.appendChild(viewAllLink);
+        movieList.appendChild(viewAllItem);
+      }
     });
   } catch (error) {
     console.error("Error displaying movies:", error);

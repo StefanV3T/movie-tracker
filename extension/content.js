@@ -9,12 +9,16 @@ const SEND_COOLDOWN = 10000; // 10 seconds cooldown
 
 // Determine which streaming platform we're on
 function getPlatform() {
-  if (location.hostname.includes('netflix.com')) {
-    return 'netflix';
-  } else if (location.hostname.includes('disneyplus.com')) {
-    return 'disney';
-  }
-  return null;
+    if (location.hostname.includes('netflix.com')) {
+      return 'netflix';
+    } else if (location.hostname.includes('disneyplus.com')) {
+      return 'disney';
+    } else if (location.hostname.includes('play.max.com')) {
+      return 'hbo';
+    } else if (location.hostname.includes('primevideo.com')) {
+      return 'prime';
+    }
+    return null;
 }
 
 // Check if the user is logged in
@@ -39,6 +43,42 @@ function checkLoginStatus() {
   });
 }
 
+function getHboTitle() {
+    // Skip title detection on any non-watch pages
+    if (!location.pathname.includes("/video/watch/")) {
+        console.log("Not on an HBO Max watch page - skipping title detection");
+        return null;
+    }
+    
+    // Use the HBO Max title selector
+    const element = document.querySelector('[data-testid="player-ux-asset-title"]');
+    
+    if (element && element.innerText && element.innerText.trim()) {
+        const title = element.innerText.trim();
+        console.log(`Found HBO Max title: "${title}"`);
+        return title;
+    }
+    
+    // Alternate selectors if the first one fails
+    const alternateSelectors = [
+        '.Title-Fuse-Web-Play__sc-k9fw09-2',
+        '.player-title',
+        'h1.title'
+    ];
+    
+    for (const selector of alternateSelectors) {
+        const element = document.querySelector(selector);
+        if (element && element.innerText && element.innerText.trim()) {
+            const title = element.innerText.trim();
+            console.log(`Found HBO Max title (alternate): "${title}"`);
+            return title;
+        }
+    }
+    
+    console.log("No HBO Max title element found");
+    return null;
+}
+
 // Function to get titles based on the current platform
 function getTitle() {
     const platform = getPlatform();
@@ -47,9 +87,50 @@ function getTitle() {
         return getNetflixTitle();
     } else if (platform === 'disney') {
         return getDisneyTitle();
+    } else if (platform === 'hbo') {
+        return getHboTitle();
+    } else if (platform === 'prime') {
+        return getPrimeTitle();
     }
     
     console.log("Not on a supported streaming platform");
+    return null;
+}
+
+function getPrimeTitle() {
+    // Skip title detection on non-detail/player pages
+    if (!location.pathname.includes("/detail/") && !location.pathname.includes("/watch/")) {
+        console.log("Not on a Prime Video watch page - skipping title detection");
+        return null;
+    }
+    
+    // Use the Prime Video title selector
+    const titleElement = document.querySelector('h1.atvwebplayersdk-title-text');
+    
+    if (titleElement && titleElement.innerText && titleElement.innerText.trim()) {
+        const title = titleElement.innerText.trim();
+        console.log(`Found Prime Video title: "${title}"`);
+        return title;
+    }
+    
+    // Alternate selectors if the first one fails
+    const alternateSelectors = [
+        '.webPlayerUIContainer h1',
+        '.dv-node-dp-title h1',
+        '[data-automation-id="title"]',
+        '.tst-title-text'
+    ];
+    
+    for (const selector of alternateSelectors) {
+        const element = document.querySelector(selector);
+        if (element && element.innerText && element.innerText.trim()) {
+            const title = element.innerText.trim();
+            console.log(`Found Prime Video title (alternate): "${title}"`);
+            return title;
+        }
+    }
+    
+    console.log("No Prime Video title element found");
     return null;
 }
 
@@ -119,6 +200,10 @@ function isWatchPage() {
         return location.pathname.startsWith("/watch");
     } else if (platform === 'disney') {
         return location.pathname.includes("/play/");
+    } else if (platform === 'hbo') {
+        return location.pathname.includes("/video/watch/");
+    } else if (platform === 'prime') {
+        return location.pathname.includes("/detail/") || location.pathname.includes("/watch/");
     }
     return false;
 }

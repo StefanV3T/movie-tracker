@@ -5,6 +5,25 @@
   --netflix-gray: #757575;
   --disney-blue: #0063e5;
   --disney-dark: #132c5b;
+  --hbo-purple: #5822b4;
+  --prime-blue: #00A8E1;
+}
+
+.platform-prime {
+  border-left: 3px solid #00A8E1;
+}
+
+.platform-prime-badge {
+  background: linear-gradient(135deg, #00A8E1, #299ec4);
+}
+
+.platform-hbo {
+  border-left: 3px solid #5822b4;
+}
+
+/* If you want to use HBO's gradient colors */
+.platform-hbo-badge {
+  background: linear-gradient(135deg, #5822b4, #8c3fdb);
 }
   
   body {
@@ -51,6 +70,14 @@
   
   #movie-list li[data-platform="netflix"] {
     border-left: 3px solid var(--netflix-red);
+  }
+
+  #movie-list li[data-platform="hbo"] {
+    border-left: 3px solid var(--hbo-purple);
+  }
+  
+  #movie-list li[data-platform="prime"] {
+    border-left: 3px solid var(--prime-blue);
   }
   
   #movie-list li:hover {
