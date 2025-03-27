@@ -156,6 +156,11 @@ async function fetchAndMergeSupabaseData(authSession) {
             if (localMovie.platform) {
               localMovie.platform = supabaseMovie.platform;
             }
+
+            if (supabaseMovie.cover_url && !localMovie.coverUrl) {
+              localMovie.coverUrl = supabaseMovie.cover_url;
+              localMovie.releaseYear = supabaseMovie.release_year;
+            }
             
             hasChanges = true;
             console.log(`Updated local movie: ${supabaseMovie.title}`);
@@ -167,7 +172,9 @@ async function fetchAndMergeSupabaseData(authSession) {
             timestamp: supabaseMovie.watched_at || new Date().toISOString(),
             viewCount: supabaseMovie.view_count || 1,
             lastWatched: supabaseMovie.last_watched || supabaseMovie.watched_at || new Date().toISOString(),
-            platform: supabaseMovie.platform || 'netflix'
+            platform: supabaseMovie.platform || 'netflix',
+            coverUrl: supabaseMovie.cover_url || null,
+            releaseYear: supabaseMovie.release_year || null
           });
           hasChanges = true;
           console.log(`Added new local movie: ${supabaseMovie.title} (${supabaseMovie.platform || 'netflix'})`);

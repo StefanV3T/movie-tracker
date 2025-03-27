@@ -7,4 +7,7 @@ export interface Movie {
     platform?: string;
     user_id: string;
     rating?: number;
+    cover_url?: string;
+    release_year?: string;
+    movie_url?: string;
   }
