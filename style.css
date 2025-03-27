@@ -1,0 +1,114 @@
+:root {
+    --netflix-red: #e50914;
+    --netflix-dark: #141414;
+    --netflix-light: #f5f5f1;
+    --netflix-gray: #757575;
+  }
+  
+  body {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    margin: 0;
+    padding: 16px;
+    background-color: var(--netflix-dark);
+    color: var(--netflix-light);
+    width: 350px;
+    max-height: 500px;
+    overflow-y: auto;
+    border-radius: 8px;
+  }
+  
+  h2 {
+    margin-top: 0;
+    padding-bottom: 8px;
+    font-size: 20px;
+    font-weight: 500;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  #movie-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 12px 0;
+  }
+  
+  #movie-list li {
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    border-left: 3px solid var(--netflix-red);
+    transition: transform 0.2s, background-color 0.2s;
+  }
+  
+  #movie-list li:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: translateX(2px);
+  }
+  
+  #movie-list li span:first-child {
+    font-weight: 500;
+  }
+  
+  #movie-list li span:last-child {
+    font-size: 11px;
+    color: var(--netflix-gray);
+    display: block;
+    margin-top: 4px;
+  }
+  
+  button {
+    background-color: var(--netflix-red);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-top: 8px;
+    transition: background-color 0.2s;
+    width: 100%;
+  }
+  
+  button:hover {
+    background-color: #f40612;
+  }
+  
+  button#clear {
+    background-color: rgba(229, 9, 20, 0.7);
+  }
+  
+  button#clear:hover {
+    background-color: var(--netflix-red);
+  }
+  
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: var(--netflix-dark);
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+  
+  /* Animation for new entries */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  #movie-list li {
+    animation: fadeIn 0.3s ease-out;
+  }
+  
