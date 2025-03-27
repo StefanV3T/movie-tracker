@@ -72,7 +72,7 @@ export default function Dashboard() {
     const matchesTab = 
       (activeTab === 'all') ||
       (activeTab === 'unrated' && (!movie.rating || movie.rating === 0)) ||
-      (activeTab === 'favorites' && movie.rating && movie.rating >= 4);
+      (activeTab === 'favorites' && movie.is_favorite === true);
     
     // Platform filter
     const matchesPlatform = !platformFilter || movie.platform === platformFilter;
@@ -101,7 +101,7 @@ export default function Dashboard() {
 
   // Count unrated movies
   const unratedCount = movies.filter(movie => !movie.rating || movie.rating === 0).length;
-  const favoritesCount = movies.filter(movie => movie.rating && movie.rating >= 4).length;
+  const favoritesCount = movies.filter(movie => movie.is_favorite === true).length;
 
   if (loading) {
     return <div className="flex items-center justify-center min-h-screen text-gray-800">Loading...</div>;

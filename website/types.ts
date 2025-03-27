@@ -10,4 +10,5 @@ export interface Movie {
     cover_url?: string;
     release_year?: string;
     movie_url?: string;
+    is_favorite?: boolean;
   }

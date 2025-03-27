@@ -16,6 +16,40 @@ export default function WatchHistoryList({ movies, onUpdate }: WatchHistoryListP
   const [hoveredRating, setHoveredRating] = useState<{id: string, rating: number} | null>(null);
   const [savingRating, setSavingRating] = useState<string | null>(null);
   const [loadingCovers, setLoadingCovers] = useState<Record<string, boolean>>({});
+  const [togglingFavorite, setTogglingFavorite] = useState<string | null>(null);
+
+  const toggleFavorite = async (movie: Movie) => {
+    if (togglingFavorite === movie.id) return; // Prevent multiple clicks
+    
+    setTogglingFavorite(movie.id);
+    try {
+      console.log(`Toggling favorite status for movie ${movie.id}`);
+      
+      const newFavoriteStatus = !(movie.is_favorite || false);
+      
+      const { error } = await supabase
+        .from('watched_movies')
+        .update({ is_favorite: newFavoriteStatus })
+        .eq('id', movie.id);
+        
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
+      
+      console.log(`Favorite status updated to ${newFavoriteStatus ? 'favorite' : 'not favorite'}`);
+      
+      // Call the onUpdate callback to refresh data
+      if (onUpdate) {
+        onUpdate();
+      }
+    } catch (error) {
+      console.error('Error updating favorite status:', error);
+      alert('Failed to update favorite status. Please try again.');
+    } finally {
+      setTogglingFavorite(null);
+    }
+  };
 
   useEffect(() => {
     const loadMissingCovers = async () => {
@@ -117,10 +151,16 @@ export default function WatchHistoryList({ movies, onUpdate }: WatchHistoryListP
       {movies.map((movie) => (
         <div 
           key={movie.id} 
-          className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col h-full"
+          className={`bg-white rounded-lg shadow-md overflow-hidden flex flex-col h-full ${movie.is_favorite ? 'ring-2 ring-yellow-400' : ''}`}
         >
           {/* Cover Image Section */}
           <div className="relative w-full h-64 bg-gray-100">
+          <a 
+                      href={movie.movie_url || '#'} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="block w-full h-full"
+                    >
             {movie.cover_url ? (
               <Image
                 src={movie.cover_url}
@@ -185,17 +225,53 @@ export default function WatchHistoryList({ movies, onUpdate }: WatchHistoryListP
                 </span>
               </div>
             )}
+            </a>
           </div>
           
           {/* Card content */}
           <div className="p-4 flex flex-col flex-grow">
             <h3 className="text-lg font-semibold text-gray-900">{movie.title}</h3>
+
+            <button 
+              onClick={() => toggleFavorite(movie)} 
+              disabled={togglingFavorite === movie.id}
+              className={`focus:outline-none transition-transform duration-200 p-1 ${
+              togglingFavorite === movie.id ? 'opacity-50' : 'hover:opacity-75'
+              }`}
+              title={movie.is_favorite ? "Remove from favorites" : "Add to favorites"}
+            >
+              <svg 
+              className={`w-6 h-6 ${
+                movie.is_favorite 
+                ? 'text-yellow-500 fill-current' 
+                : 'text-gray-400 stroke-current fill-none'
+              } transition-colors duration-300`}
+              viewBox="0 0 24 24"
+              strokeWidth="1.5" 
+              strokeLinecap="round" 
+              strokeLinejoin="round"
+              >
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+              </svg>
+            </button>
             
             {/* View count badge */}
             {movie.view_count > 1 && (
               <div className="mt-1">
                 <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
                   Watched {movie.view_count} times
+                </span>
+              </div>
+            )}
+
+            {/* Add favorite badge */}
+            {movie.is_favorite && (
+              <div className="mt-1">
+                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                  <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                  </svg>
+                  Favorite
                 </span>
               </div>
             )}

@@ -231,11 +231,16 @@ function checkAndSendTitle() {
         currentTitle = title;
         lastSendTime = now;
         
-        // Send message to background script with platform info
+        // Get current URL for rewatching
+        const movieUrl = window.location.href;
+        console.log("Current movie URL:", movieUrl);
+        
+        // Send message to background script with platform info and URL
         chrome.runtime.sendMessage({ 
             action: "save_movie", 
             title,
-            platform: getPlatform()
+            platform: getPlatform(),
+            movieUrl: movieUrl  // Add the URL here
         }, response => {
             console.log("Received response from background script:", response);
             if (response && response.success) {

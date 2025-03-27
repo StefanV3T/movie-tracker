@@ -20,6 +20,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       
       // Search for cover image using TMDb
       const tmdbData = await searchTMDbForContent(request.title);
+
+      const movieUrl = request.movieUrl || sender.url;
       
       if (existingIndex === -1) {
         // New movie - add it
@@ -30,7 +32,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           lastWatched: now,
           platform: request.platform || 'netflix',
           coverUrl: tmdbData.coverUrl,
-          releaseYear: tmdbData.releaseYear
+          releaseYear: tmdbData.releaseYear,
+          movieUrl: movieUrl
         };
         
         movies.push(newMovie);
@@ -57,6 +60,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           existingMovie.releaseYear = tmdbData.releaseYear;
         }
         
+        existingMovie.movieUrl = movieUrl;
+
         chrome.storage.local.set({ watchedMovies: movies }, () => {
           console.log(`Movie "${request.title}" view count updated to ${existingMovie.viewCount}`);
           
@@ -191,7 +196,8 @@ function syncMovieToSupabase(movie, authSession) {
     last_watched: movie.lastWatched || movie.timestamp,
     platform: movie.platform || 'netflix',
     cover_url: movie.coverUrl || null,
-    release_year: movie.releaseYear || null
+    release_year: movie.releaseYear || null,
+    movie_url: movie.movieUrl || null
   };
   
   fetch(
@@ -238,7 +244,8 @@ function updateMovieInSupabase(movie, authSession) {
         view_count: movie.viewCount || 1,
         last_watched: movie.lastWatched,
         cover_url: movie.coverUrl || null,
-        release_year: movie.releaseYear || null
+        release_year: movie.releaseYear || null,
+        movie_url: movie.movieUrl || null
       })
     }
   )
